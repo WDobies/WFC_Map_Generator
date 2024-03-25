@@ -14,7 +14,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4
   m_IsActive: 1
 --- !u!4 &2140503623424796823
 Transform:
@@ -86,6 +86,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 5e171e70ca09ff44b91257b6b3e0d94d, type: 3}
       propertyPath: m_Name
       value: square_waterStraight
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 5e171e70ca09ff44b91257b6b3e0d94d, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5e171e70ca09ff44b91257b6b3e0d94d, type: 3}

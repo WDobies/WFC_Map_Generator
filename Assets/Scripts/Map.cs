@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -8,8 +9,8 @@ public class Map : MonoBehaviour
     [SerializeField] Vector2Int mapSize;
     [SerializeField] int cellSize;
 
-    public MapTile[] tile;
-    private Tile[,] grid;
+    public Tile[] tiles;
+    private Dictionary<Vector2Int,GridTile> grid;
 
     private Vector2Int[] neighbours = new Vector2Int[]
     {
@@ -19,109 +20,113 @@ public class Map : MonoBehaviour
         new Vector2Int(-1, 0),
     };
 
-    void Start()
+    public void GenerateMap()
     {
-        grid = new Tile[mapSize.x, mapSize.y];
+        DestroyMap();
 
-        for (int x = 0; x < mapSize.x; x++)
-        {
-            for (int y = 0; y < mapSize.y; y++)
-            {
-                grid[x, y] = new Tile();
-                grid[x, y].AvaliableTiles.AddRange(tile);
-            }
-        }
+        grid = new Dictionary<Vector2Int, GridTile>();
 
         Vector2Int mid = new Vector2Int(mapSize.x / 2, mapSize.y / 2);
-
-        grid[mid.x, mid.y].Updated = true;
-        grid[mid.x, mid.y].SelectedTile = tile[UnityEngine.Random.Range(0,tile.Length)];
+        GridTile midTile = new GridTile();
+        midTile.SelectedTile = tiles[UnityEngine.Random.Range(0, tiles.Length)];
+        midTile.Updated = true;
+        grid[mid] = midTile;
 
         CalculatePosibleTiles(mid);
-
         Spawn();
-
     }
-    private void Spawn()
-    {
-        for (int x = 0; x < mapSize.x; x++)
-        {
-            for (int y = 0; y < mapSize.y; y++)
-            {
-                if (grid[x, y] != null)
-                {
-                    Vector3 newPos = new Vector3(x * cellSize, 0, y * cellSize);
 
-                    if (!grid[x, y].Spawned && grid[x, y].Updated)
-                    {
-                        var r = grid[x, y].SelectedTile;
-                        Instantiate(r.Model, newPos, Quaternion.identity, transform);
-                        grid[x, y].Spawned = true;
-                    }
+    public void DestroyMap()
+    {
+        if (transform.childCount != 0)
+        {
+            for (int i = transform.childCount - 1; i >= 0; i--)
+            {
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                {
+                    DestroyImmediate(transform.GetChild(i).gameObject);
                 }
+                else
+#endif
+                    Destroy(transform.GetChild(i).gameObject); ;
             }
         }
     }
+
+    private void Spawn()
+    {
+        foreach (var gridTile in grid)
+        {
+            Vector3 newPos = new Vector3(gridTile.Key.x * cellSize, 0, gridTile.Key.y * cellSize);
+            if (!gridTile.Value.Spawned && gridTile.Value.Updated)
+            {
+                gridTile.Value.Instantiate(newPos,transform, Quaternion.identity);
+            }
+        }
+    }
+
     private void CalculatePosibleTiles(Vector2Int mid)
     {
-        if (grid[mid.x, mid.y].Spawned || !IsInsideGrid(mid)) return;
+        if (grid[mid].Spawned || !IsInsideGrid(mid)) return;
 
-        for (int i = 0; i < neighbours.Length; i++)
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+        queue.Enqueue(mid);
+
+        while (queue.Count > 0)
         {
-            Vector2Int offset = new Vector2Int(mid.x + neighbours[i].x, mid.y + neighbours[i].y);
-            if (IsInsideGrid(offset))
+            Vector2Int currentTile = queue.Dequeue();
+
+            foreach (var neighbourOffset in neighbours)
             {
-                if (!grid[offset.x, offset.y].Updated)
+                Vector2Int offset = currentTile + neighbourOffset;
+                if (!grid.ContainsKey(offset) && IsInsideGrid(offset))
                 {
+                    GridTile newTile = new GridTile();
+                    newTile.AvaliableTiles.AddRange(tiles);
+                    grid[offset] = newTile;
                     CheckNeighbours(offset);
-                    CalculatePosibleTiles(offset);
+                    queue.Enqueue(offset);
                 }
             }
         }
     }
     private void CheckNeighbours(Vector2Int pos)
     {
-        for (int i = 0; i < neighbours.Length; i++)
+        foreach (var neighbourOffset in neighbours)
         {
-            Vector2Int offset = new Vector2Int(pos.x + neighbours[i].x, pos.y + neighbours[i].y);
-            MapTile[] availableTiles;
-            if (IsInsideGrid(offset) && grid[offset.x, offset.y].Updated)
+            Vector2Int offset = pos + neighbourOffset;
+
+            if (grid.TryGetValue(offset, out GridTile neighbourTile) && neighbourTile.Updated)
             {
-                switch (i)
+                switch (neighbourOffset)
                 {
-                    case 0:
-                        availableTiles = Array.FindAll(tile, x => x.down == grid[offset.x, offset.y].SelectedTile.up);
-                        UpdateAvaliableTiles(availableTiles, pos);
+                    case Vector2Int up when up == Vector2Int.up:
+                        UpdateAvailableTiles(tiles.Where(x => x.down == neighbourTile.SelectedTile.up).ToArray(), pos);
                         break;
 
-                    case 1:
-                        availableTiles = Array.FindAll(tile, x => x.up == grid[offset.x, offset.y].SelectedTile.down);
-                        UpdateAvaliableTiles(availableTiles, pos);
+                    case Vector2Int down when down == Vector2Int.down:
+                        UpdateAvailableTiles(tiles.Where(x => x.up == neighbourTile.SelectedTile.down).ToArray(), pos);
                         break;
 
-                    case 2:
-                        availableTiles = Array.FindAll(tile, x => x.left == grid[offset.x, offset.y].SelectedTile.right);
-                        UpdateAvaliableTiles(availableTiles, pos);
+                    case Vector2Int right when right == Vector2Int.right:
+                        UpdateAvailableTiles(tiles.Where(x => x.left == neighbourTile.SelectedTile.right).ToArray(), pos);
                         break;
 
-                    case 3:
-                        availableTiles = Array.FindAll(tile, x => x.right == grid[offset.x, offset.y].SelectedTile.left);
-                        UpdateAvaliableTiles(availableTiles, pos);
-                        break;
-
-                    default:
+                    case Vector2Int left when left == Vector2Int.left:
+                        UpdateAvailableTiles(tiles.Where(x => x.right == neighbourTile.SelectedTile.left).ToArray(), pos);
                         break;
                 }
             }
         }
-        if (grid[pos.x, pos.y].AvaliableTiles.Count == 0)
+        if (grid[pos].AvaliableTiles.Count == 0)
         {
             Debug.Log("NO TILES TO FIT IN");
-            grid[pos.x, pos.y].SelectedTile = tile[0];
+            grid[pos].SelectedTile = tiles[0];
         }
-        else grid[pos.x, pos.y].SelectedTile = grid[pos.x, pos.y].AvaliableTiles[UnityEngine.Random.Range(0, grid[pos.x, pos.y].AvaliableTiles.Count)];
+        else grid[pos].SelectedTile = grid[pos].AvaliableTiles[UnityEngine.Random.Range(0, grid[pos].AvaliableTiles.Count)];
 
-        grid[pos.x, pos.y].Updated = true;
+        grid[pos].Updated = true;
     }
 
     private bool IsInsideGrid(Vector2Int vec)
@@ -129,18 +134,24 @@ public class Map : MonoBehaviour
         if (vec.x >= 0 && vec.x < mapSize.x && vec.y >= 0 && vec.y < mapSize.y) return true;
         return false;
     }
-    private void UpdateAvaliableTiles(MapTile[] availableTiles, Vector2Int pos)
+    private void UpdateAvailableTiles(Tile[] availableTiles, Vector2Int pos)
     {
-        var commonElements = grid[pos.x, pos.y].AvaliableTiles.Intersect(availableTiles).ToList();
-        grid[pos.x, pos.y].AvaliableTiles.Clear();
-        grid[pos.x, pos.y].AvaliableTiles.AddRange(commonElements);
+        var commonElements = grid[pos].AvaliableTiles.Intersect(availableTiles).ToList();
+        grid[pos].AvaliableTiles.Clear();
+        grid[pos].AvaliableTiles.AddRange(commonElements);
     }
 }
 
-public class Tile
+public class GridTile
 {
     public bool Spawned;
     public bool Updated;
-    public MapTile SelectedTile;
-    public List<MapTile> AvaliableTiles = new List<MapTile>();
+    public Tile SelectedTile;
+    public List<Tile> AvaliableTiles = new List<Tile>();
+
+    public void Instantiate(Vector3 position, Transform parent, Quaternion rotation)
+    {
+        GameObject.Instantiate(SelectedTile.Model, position, Quaternion.identity, parent);
+        Spawned = true;
+    }
 }

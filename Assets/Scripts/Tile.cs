@@ -2,10 +2,10 @@ using System;
 using UnityEngine;
 
 [Serializable]
-public class MapTile
+public class Tile
 {
-    [SerializeField] GameObject model;
-    public TileType tileType;
+    [SerializeField] private GameObject model;
+
     [Header("Allowed connections")]
     public ConnectionType up;
     public ConnectionType down;
@@ -24,13 +24,4 @@ public enum ConnectionType
     Water,
 }
 
-public enum TileType
-{
-    None,
-    Grass,
-    GrassRoadUR,
-    GrassRoadUL,
-    GrassRoadUD,
-    GrassRoadDR,
-    GrassRoadDL,
-}
+

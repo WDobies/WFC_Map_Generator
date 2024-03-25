@@ -3,7 +3,7 @@ using UnityEngine;
 public class TileMatrix : MonoBehaviour
 {
     public bool isCollapsed;
-    public MapTile tile;
+    public Tile tile;
     public Vector3 Position;
     public Quaternion Rotation = Quaternion.Euler(-90, 0, 0);
     public Vector2Int index = new Vector2Int();
