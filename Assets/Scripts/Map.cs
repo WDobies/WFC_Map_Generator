@@ -121,7 +121,7 @@ public class Map : MonoBehaviour
         }
         if (grid[pos].AvaliableTiles.Count == 0)
         {
-            Debug.Log("NO TILES TO FIT IN");
+            Debug.Log("NO TILES TO FIT IN ON POSITION: "+ pos);
             grid[pos].SelectedTile = tiles[0];
         }
         else grid[pos].SelectedTile = grid[pos].AvaliableTiles[UnityEngine.Random.Range(0, grid[pos].AvaliableTiles.Count)];

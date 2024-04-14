@@ -2,17 +2,15 @@ using System;
 using UnityEngine;
 
 [Serializable]
-public class Tile
+public class Tile: MonoBehaviour
 {
-    [SerializeField] private GameObject model;
-
     [Header("Allowed connections")]
     public ConnectionType up;
     public ConnectionType down;
     public ConnectionType left;
     public ConnectionType right;
 
-    public GameObject Model => model;
+    public GameObject Model => this.gameObject;
 
 }
 
