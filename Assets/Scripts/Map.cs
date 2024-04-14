@@ -102,19 +102,19 @@ public class Map : MonoBehaviour
                 switch (neighbourOffset)
                 {
                     case Vector2Int up when up == Vector2Int.up:
-                        UpdateAvailableTiles(tiles.Where(x => x.down == neighbourTile.SelectedTile.up).ToArray(), pos);
+                        UpdateAvailableTiles(tiles.Where(x => x.down.Any(c => c == neighbourTile.SelectedTile.up[0])).ToArray(), pos);
                         break;
 
                     case Vector2Int down when down == Vector2Int.down:
-                        UpdateAvailableTiles(tiles.Where(x => x.up == neighbourTile.SelectedTile.down).ToArray(), pos);
+                        UpdateAvailableTiles(tiles.Where(x => x.up.Any(c => c == neighbourTile.SelectedTile.down[0])).ToArray(), pos);
                         break;
 
                     case Vector2Int right when right == Vector2Int.right:
-                        UpdateAvailableTiles(tiles.Where(x => x.left == neighbourTile.SelectedTile.right).ToArray(), pos);
+                        UpdateAvailableTiles(tiles.Where(x => x.left.Any(c => c == neighbourTile.SelectedTile.right[0])).ToArray(), pos);
                         break;
 
                     case Vector2Int left when left == Vector2Int.left:
-                        UpdateAvailableTiles(tiles.Where(x => x.right == neighbourTile.SelectedTile.left).ToArray(), pos);
+                        UpdateAvailableTiles(tiles.Where(x => x.right.Any(c => c == neighbourTile.SelectedTile.left[0])).ToArray(), pos);
                         break;
                 }
             }

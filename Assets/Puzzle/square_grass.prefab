@@ -45,11 +45,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff470a74164755c41b208050d69e399a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  model: {fileID: 5919065795274457924}
-  up: 1
-  down: 1
-  left: 1
-  right: 1
+  up: 01000000
+  down: 01000000
+  left: 01000000
+  right: 01000000
 --- !u!1 &7943376353904863767
 GameObject:
   m_ObjectHideFlags: 0

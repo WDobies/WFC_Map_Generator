@@ -130,8 +130,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff470a74164755c41b208050d69e399a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  model: {fileID: 4930532120933126513}
-  up: 1
-  down: 1
-  left: 2
-  right: 2
+  up: 01000000
+  down: 01000000
+  left: 02000000
+  right: 02000000

@@ -131,11 +131,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff470a74164755c41b208050d69e399a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  model: {fileID: 683435590859535274}
-  up: 1
-  down: 2
-  left: 2
-  right: 1
+  up: 01000000
+  down: 02000000
+  left: 02000000
+  right: 01000000
 --- !u!1 &9153675108631917599
 GameObject:
   m_ObjectHideFlags: 0
